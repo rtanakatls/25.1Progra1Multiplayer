@@ -34,7 +34,7 @@ public class Bullet : NetworkBehaviour
     {
         if (IsServer && other.gameObject.CompareTag("Player") && other.GetComponent<Player>().OwnerClientId != ownerId)
         {
-            NetworkObject.Despawn(gameObject);
+            NetworkObject.Despawn();
         }
     }
 
