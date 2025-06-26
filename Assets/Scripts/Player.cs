@@ -8,9 +8,13 @@ public class Player : NetworkBehaviour
     private Rigidbody rb;
     [SerializeField] private float speed;
     [SerializeField] private TextMesh playerNameText;
+    [SerializeField] private GameObject bulletPrefab;
+    private Vector3 shootDirection;
+
 
     private void Awake()
     {
+        shootDirection=transform.forward;
         rb = GetComponent<Rigidbody>();
     }
 
@@ -44,8 +48,6 @@ public class Player : NetworkBehaviour
         playerNameText.text = name;
     }
 
-
-
     void Update()
     {
         if (IsOwner)
@@ -56,6 +58,25 @@ public class Player : NetworkBehaviour
             Vector2 direction = new Vector2(h, v);
             direction.Normalize();
             rb.linearVelocity = new Vector3(direction.x, 0, direction.y) * speed + Vector3.up * rb.linearVelocity.y;
+
+            if (h != 0 || v != 0)
+            {
+                shootDirection = new Vector3(h, 0, v);
+            }
+
+            if(Input.GetKeyDown(KeyCode.Space)) 
+            {
+                ShootRpc(shootDirection, transform.position);
+            }
         }
+    }
+
+    [Rpc(SendTo.Server)]
+    private void ShootRpc(Vector3 direction, Vector3 position)
+    {
+        GameObject obj = Instantiate(bulletPrefab);
+        obj.transform.position = position;
+        obj.GetComponent<Bullet>().Init(direction, OwnerClientId);
+        obj.GetComponent<NetworkObject>().Spawn();
     }
 }
